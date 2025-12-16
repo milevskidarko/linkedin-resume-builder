@@ -9,8 +9,8 @@ export default function AuthButtons() {
   const { user: auth0User, isLoading, error } = useUser();
   const { user: mockUser, login: mockLogin, logout: mockLogout } = useMockAuth();
   
-  // Auto-enable mock auth if Auth0 fails or isn't configured
-  const [useMock, setUseMock] = useState(false);
+  // Default to mock auth (since Auth0 isn't configured on production)
+  const [useMock, setUseMock] = useState(true);
   
   useEffect(() => {
     // If Auth0 throws an error or isn't configured, use mock auth
