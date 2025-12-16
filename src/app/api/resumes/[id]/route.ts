@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@auth0/nextjs-auth0";
+import { cookies } from "next/headers";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -49,6 +50,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  await cookies(); // Ensure cookies are accessed
   const session = await getSession();
   
   if (!session?.user) {
@@ -104,6 +106,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  await cookies(); // Ensure cookies are accessed
   const session = await getSession();
   
   if (!session?.user) {
