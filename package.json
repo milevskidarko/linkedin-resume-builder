@@ -14,7 +14,7 @@
   "dependencies": {
     "@auth0/nextjs-auth0": "^3.7.0",
     "@hookform/resolvers": "^5.2.2",
-    "@prisma/client": "^7.1.0",
+    "@prisma/client": "^6.19.1",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.4",
     "next": "16.0.10",
@@ -32,7 +32,7 @@
     "eslint-config-next": "16.0.10",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.7.4",
-    "prisma": "^7.1.0",
+    "prisma": "^6.19.1",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
