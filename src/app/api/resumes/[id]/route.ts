@@ -49,11 +49,14 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  // TODO: Fix Auth0 session in API routes
-  const mockUser = { sub: "google-oauth2|116131741438785734564" };
+  const session = await getSession();
+  
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   
   const resume = await prisma.resume.findFirst({
-    where: { id, user: { auth0Sub: mockUser.sub } },
+    where: { id, user: { auth0Sub: session.user.sub } },
     include: {
       user: { select: { username: true } },
       experiences: { orderBy: { sort: "asc" } },
@@ -101,8 +104,11 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  // TODO: Fix Auth0 session
-  const mockUser = { sub: "google-oauth2|116131741438785734564" };
+  const session = await getSession();
+  
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const body = await req.json().catch(() => null);
   if (!isValidPayload(body)) {
@@ -112,7 +118,7 @@ export async function PUT(
   const { personal, summary, experience, education, skills, isPublic, username } = body;
 
   const existing = await prisma.resume.findFirst({
-    where: { id, user: { auth0Sub: mockUser.sub } },
+    where: { id, user: { auth0Sub: session.user.sub } },
   });
 
   if (!existing) {
@@ -121,7 +127,7 @@ export async function PUT(
 
   if (username !== undefined) {
     await prisma.user.update({
-      where: { auth0Sub: mockUser.sub },
+      where: { auth0Sub: session.user.sub },
       data: { username: username || null },
     });
   }

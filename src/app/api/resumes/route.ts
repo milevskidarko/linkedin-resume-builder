@@ -63,12 +63,13 @@ function isValidPayload(body: unknown): body is ResumePayload {
 
 export async function GET(req: NextRequest) {
   try {
-    // TODO: Fix Auth0 session in API routes for Next.js 15
-    // const session = await getSession();
-    // Using authenticated user's actual ID
-    const mockUser = { sub: "google-oauth2|116131741438785734564", email: "milevskidark089@gmail.com" };
+    const session = await getSession();
     
-    const dbUser = await getOrCreateUser(mockUser.sub, mockUser.email);
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized", details: "No session found" }, { status: 401 });
+    }
+    
+    const dbUser = await getOrCreateUser(session.user.sub, session.user.email);
 
     const resumes = await prisma.resume.findMany({
       where: { userId: dbUser.id },
@@ -83,8 +84,8 @@ export async function GET(req: NextRequest) {
     });
 
     const response = NextResponse.json({ resumes });
-    response.headers.set('X-Auth-Mode', 'mock-user');
-    response.headers.set('X-Deploy-Version', 'v2-mock');
+    response.headers.set('X-Auth-Mode', 'dynamic-auth0');
+    response.headers.set('X-Deploy-Version', 'v3-dynamic');
     return response;
   } catch (error) {
     return NextResponse.json({ 
@@ -96,9 +97,11 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  // TODO: Fix Auth0 session in API routes for Next.js 15
-  // const session = await getSession();
-  const mockUser = { sub: "google-oauth2|116131741438785734564", email: "milevskidark089@gmail.com" };
+  const session = await getSession();
+  
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized", details: "No session found" }, { status: 401 });
+  }
 
   const body = await req.json().catch(() => null);
   if (!isValidPayload(body)) {
@@ -107,7 +110,7 @@ export async function POST(req: NextRequest) {
 
   const { personal, summary, experience, education, skills, isPublic, username } = body;
   
-  const dbUser = await getOrCreateUser(mockUser.sub, mockUser.email);
+  const dbUser = await getOrCreateUser(session.user.sub, session.user.email);
 
   if (username && dbUser.id !== "mock-user-id") {
     try {
