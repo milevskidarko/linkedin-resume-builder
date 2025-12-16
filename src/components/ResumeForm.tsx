@@ -297,29 +297,119 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold mb-2">Skills</h2>
-        <div className="flex flex-wrap gap-2 mb-2">
-          {skills.map((skill, index) => (
-            <span
-              key={index}
-              className="bg-blue-100 px-2 py-1 rounded flex items-center"
+        <h2 className="text-xl font-semibold mb-4">Skills</h2>
+        
+        {/* Technical Skills */}
+        <div className="mb-4">
+          <h3 className="text-base font-medium mb-2">Technical Skills</h3>
+          <div className="mb-2">
+            <select
+              onChange={(e) => {
+                if (e.target.value) {
+                  addSkill(e.target.value);
+                  e.target.value = '';
+                }
+              }}
+              className="w-full p-2 border rounded text-sm"
+              defaultValue=""
             >
-              {skill}
-              <button
-                type="button"
-                onClick={() => removeSkill(index)}
-                className="ml-2 text-red-500 hover:text-red-700"
-              >
-                ×
-              </button>
-            </span>
-          ))}
+              <option value="">Quick add: Programming Languages & Tools</option>
+              <optgroup label="Languages">
+                <option value="JavaScript">JavaScript</option>
+                <option value="TypeScript">TypeScript</option>
+                <option value="Python">Python</option>
+                <option value="Java">Java</option>
+                <option value="C#">C#</option>
+                <option value="C++">C++</option>
+                <option value="PHP">PHP</option>
+                <option value="Ruby">Ruby</option>
+                <option value="Go">Go</option>
+                <option value="Rust">Rust</option>
+                <option value="Swift">Swift</option>
+                <option value="Kotlin">Kotlin</option>
+                <option value="SQL">SQL</option>
+              </optgroup>
+              <optgroup label="Frameworks & Libraries">
+                <option value="React">React</option>
+                <option value="Next.js">Next.js</option>
+                <option value="Vue.js">Vue.js</option>
+                <option value="Angular">Angular</option>
+                <option value="Node.js">Node.js</option>
+                <option value="Express">Express</option>
+                <option value="Django">Django</option>
+                <option value="Flask">Flask</option>
+                <option value="Spring Boot">Spring Boot</option>
+              </optgroup>
+              <optgroup label="Tools & Technologies">
+                <option value="Git">Git</option>
+                <option value="Docker">Docker</option>
+                <option value="AWS">AWS</option>
+                <option value="Azure">Azure</option>
+                <option value="GraphQL">GraphQL</option>
+                <option value="REST API">REST API</option>
+                <option value="PostgreSQL">PostgreSQL</option>
+                <option value="MongoDB">MongoDB</option>
+              </optgroup>
+            </select>
+          </div>
         </div>
+
+        {/* Soft Skills */}
+        <div className="mb-4">
+          <h3 className="text-base font-medium mb-2">Soft Skills</h3>
+          <div className="mb-2">
+            <select
+              onChange={(e) => {
+                if (e.target.value) {
+                  addSkill(e.target.value);
+                  e.target.value = '';
+                }
+              }}
+              className="w-full p-2 border rounded text-sm"
+              defaultValue=""
+            >
+              <option value="">Quick add: Soft Skills</option>
+              <option value="Leadership">Leadership</option>
+              <option value="Communication">Communication</option>
+              <option value="Problem Solving">Problem Solving</option>
+              <option value="Team Collaboration">Team Collaboration</option>
+              <option value="Time Management">Time Management</option>
+              <option value="Critical Thinking">Critical Thinking</option>
+              <option value="Adaptability">Adaptability</option>
+              <option value="Project Management">Project Management</option>
+            </select>
+          </div>
+        </div>
+
+        {/* All Skills Display */}
+        <div className="flex flex-wrap gap-2 mb-3 p-3 bg-gray-50 rounded border">
+          {skills.length === 0 ? (
+            <p className="text-sm text-gray-500">No skills added yet</p>
+          ) : (
+            skills.map((skill, index) => (
+              <span
+                key={index}
+                className="bg-blue-100 px-3 py-1 rounded-full flex items-center text-sm"
+              >
+                {skill}
+                <button
+                  type="button"
+                  onClick={() => removeSkill(index)}
+                  className="ml-2 text-red-500 hover:text-red-700 font-bold"
+                >
+                  ×
+                </button>
+              </span>
+            ))
+          )}
+        </div>
+
+        {/* Custom Skill Input */}
         <div className="flex gap-2">
           <input
             type="text"
             id="skillInput"
-            placeholder="Add a skill"
+            placeholder="Add any skill (technical, soft skill, or tool)"
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault();
@@ -327,7 +417,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
                 (e.target as HTMLInputElement).value = '';
               }
             }}
-            className="flex-1 p-2 border rounded"
+            className="flex-1 p-2 border rounded text-sm"
           />
           <button
             type="button"
@@ -338,7 +428,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
               addSkill(input.value);
               input.value = '';
             }}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm"
           >
             Add
           </button>

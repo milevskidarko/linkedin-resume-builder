@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import ResumePreview from "../../components/ResumePreview";
+import ResumePreview, { type ResumeTheme } from "../../components/ResumePreview";
 import type { ResumeFormData } from "@/components/ResumeForm";
 import ResumeForm from "@/components/ResumeForm";
 
@@ -32,6 +32,7 @@ export default function BuilderPage() {
   const [error, setError] = useState<string | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [usernameInput, setUsernameInput] = useState("");
+  const [theme, setTheme] = useState<ResumeTheme>("classic");
   const saveTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -59,6 +60,7 @@ export default function BuilderPage() {
           }
           const data = await res.json();
           if (!cancelled) {
+            console.log("Loaded resume data:", data);
             setResumeId(data.id);
             setMetadata({
               id: data.id,
@@ -66,13 +68,20 @@ export default function BuilderPage() {
               username: data.username ?? null,
             });
             setUsernameInput(data.username ?? "");
-            setResumeData({
-              personal: data.personal,
+            const loadedData = {
+              personal: {
+                name: data.personal?.name || "",
+                email: data.personal?.email || "",
+                phone: data.personal?.phone || "",
+                address: data.personal?.address || "",
+              },
               summary: data.summary ?? "",
               experience: data.experience ?? emptyResume.experience,
               education: data.education ?? emptyResume.education,
               skills: data.skills ?? [],
-            });
+            };
+            console.log("Setting resume data:", loadedData);
+            setResumeData(loadedData);
             setLastSaved(new Date(data.updatedAt ?? Date.now()));
           }
         }
@@ -109,6 +118,7 @@ export default function BuilderPage() {
         ...data,
         ...(metaData && { isPublic: metaData.isPublic, username: metaData.username })
       };
+      console.log("Saving payload:", payload);
       const resp = await fetch(resumeId ? `/api/resumes/${resumeId}` : "/api/resumes", {
         method: resumeId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
@@ -147,7 +157,7 @@ export default function BuilderPage() {
           <p>Loading your latest draft...</p>
         ) : (
           <>
-            <ResumeForm initialData={resumeData} onChange={setResumeData} />
+            <ResumeForm key={resumeId || 'new'} initialData={resumeData} onChange={setResumeData} />
             
             {resumeId && (
               <div className="mt-6 p-4 border rounded-lg bg-gray-50">
@@ -205,8 +215,26 @@ export default function BuilderPage() {
         </div>
       </div>
       <div>
-        <h1 className="text-2xl font-bold mb-4">Preview</h1>
-        {resumeData ? <ResumePreview formData={resumeData} showPrintButton /> : <p>Fill the form to see preview</p>}
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-2xl font-bold">Preview</h1>
+          <div className="flex items-center gap-2">
+            <label htmlFor="theme-select" className="text-sm font-medium text-gray-700">
+              Theme:
+            </label>
+            <select
+              id="theme-select"
+              value={theme}
+              onChange={(e) => setTheme(e.target.value as ResumeTheme)}
+              className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="classic">Classic Blue</option>
+              <option value="modern">Modern Teal</option>
+              <option value="professional">Professional Navy</option>
+              <option value="minimal">Minimal Black</option>
+            </select>
+          </div>
+        </div>
+        {resumeData ? <ResumePreview formData={resumeData} showPrintButton theme={theme} /> : <p>Fill the form to see preview</p>}
       </div>
     </div>
   );
