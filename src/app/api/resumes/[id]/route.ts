@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@auth0/nextjs-auth0";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 type ResumePayload = {
   personal: {
@@ -48,8 +49,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const res = new NextResponse();
-  const session = await getSession(req, res);
+  const session = await getSession();
   
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -104,8 +104,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const res = new NextResponse();
-  const session = await getSession(req, res);
+  const session = await getSession();
   
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
