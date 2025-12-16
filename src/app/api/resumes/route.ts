@@ -82,9 +82,16 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ resumes });
+    const response = NextResponse.json({ resumes });
+    response.headers.set('X-Auth-Mode', 'mock-user');
+    response.headers.set('X-Deploy-Version', 'v2-mock');
+    return response;
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch resumes", details: error instanceof Error ? error.message : "Unknown error" }, { status: 500 });
+    return NextResponse.json({ 
+      error: "Failed to fetch resumes", 
+      details: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined 
+    }, { status: 500 });
   }
 }
 
