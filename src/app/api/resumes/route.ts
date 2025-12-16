@@ -1,7 +1,8 @@
 import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession, withApiAuthRequired } from "@auth0/nextjs-auth0/edge";
+import { getSession } from "@auth0/nextjs-auth0";
 
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 type ResumePayload = {
@@ -60,9 +61,13 @@ function isValidPayload(body: unknown): body is ResumePayload {
   return true;
 }
 
-export const GET = withApiAuthRequired(async (req: NextRequest) => {
-  const res = new NextResponse();
-  const session = await getSession(req, res);
+export async function GET(req: NextRequest) {
+  const session = await getSession();
+  
+  // Debug logging
+  if (!session) {
+    return NextResponse.json({ error: "No session found" }, { status: 401 });
+  }
   
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -83,11 +88,10 @@ export const GET = withApiAuthRequired(async (req: NextRequest) => {
   });
 
   return NextResponse.json({ resumes });
-});
+}
 
-export const POST = withApiAuthRequired(async (req: NextRequest) => {
-  const res = new NextResponse();
-  const session = await getSession(req, res);
+export async function POST(req: NextRequest) {
+  const session = await getSession();
   
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -153,4 +157,4 @@ export const POST = withApiAuthRequired(async (req: NextRequest) => {
       { status: 201 }
     );
   }
-});
+}
