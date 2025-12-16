@@ -87,19 +87,23 @@ export default function ResumePreview({
         scale: 2,
         logging: false,
         backgroundColor: '#ffffff',
-        width: 800,
-        height: 600,
       });
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF();
+      const pdf = new jsPDF('p', 'mm', 'a4');
       const imgWidth = 210;
+      const pageHeight = 297;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
 
-      if (imgHeight > 295) {
-        const scale = 295 / imgHeight;
-        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth * scale, 295);
-      } else {
-        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
       }
 
       pdf.save('resume.pdf');
@@ -315,43 +319,46 @@ export default function ResumePreview({
         </div>
 
         {/* Skills */}
-        <div>
-          <h2
-            style={{
-              fontSize: '0.875rem',
-              fontWeight: '700',
-              color: colors.text,
-              marginBottom: '12px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-            }}
-          >
-            SKILLS
-          </h2>
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '8px',
-            }}
-          >
-            {formData.skills.map((skill, index) => (
-              <span
-                key={index}
-                style={{
-                  backgroundColor: '#f3f4f6',
-                  color: colors.text,
-                  padding: '6px 14px',
-                  borderRadius: '16px',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                }}
-              >
-                {skill}
-              </span>
-            ))}
+        {formData.skills.length > 0 && (
+          <div>
+            <h2
+              style={{
+                fontSize: '0.875rem',
+                fontWeight: '700',
+                color: colors.text,
+                marginBottom: '12px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
+              SKILLS
+            </h2>
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '8px',
+              }}
+            >
+              {formData.skills.map((skill, index) => (
+                <span
+                  key={index}
+                  style={{
+                    backgroundColor: colors.lightGray,
+                    color: colors.text,
+                    padding: '6px 14px',
+                    borderRadius: '16px',
+                    fontSize: '0.875rem',
+                    fontWeight: '500',
+                    border: `1px solid ${colors.lightGray}`,
+                  }}
+                >
+                  {skill}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

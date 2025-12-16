@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect,  useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -9,7 +9,12 @@ const resumeSchema = z.object({
   personal: z.object({
     name: z.string().min(1, 'Name is required'),
     email: z.string().email('Invalid email'),
-    phone: z.string().min(1, 'Phone is required'),
+    phone: z
+      .string()
+      .regex(
+        /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/,
+        'Invalid phone number format'
+      ),
     address: z.string().optional(),
   }),
   summary: z.string().optional(),
@@ -82,9 +87,14 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const subscription = watch((value: any) => {
       if (debounceTimer) clearTimeout(debounceTimer);
-      
+
       debounceTimer = setTimeout(() => {
-        onChangeRef.current(value as ResumeFormData);
+        try {
+          const validatedData = resumeSchema.parse(value);
+          onChangeRef.current(validatedData);
+        } catch (error) {
+          onChangeRef.current(value as ResumeFormData);
+        }
       }, 500);
     });
 
@@ -100,6 +110,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
 
   const onSubmit = (data: ResumeFormData) => {
     onChange(data);
+    onSave?.();
   };
 
   const addExperience = () => {
@@ -148,10 +159,14 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {/* Personal Information Card */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-5">Personal Information</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-5">
+          Personal Information
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-2">Full Name</label>
+            <label className="block text-xs font-medium text-gray-500 mb-2">
+              Full Name
+            </label>
             <input
               {...register('personal.name')}
               className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
@@ -164,7 +179,9 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
             )}
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-2">Email Address</label>
+            <label className="block text-xs font-medium text-gray-500 mb-2">
+              Email Address
+            </label>
             <input
               {...register('personal.email')}
               type="email"
@@ -178,9 +195,16 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
             )}
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-2">Phone Number</label>
+            <label className="block text-xs font-medium text-gray-500 mb-2">
+              Phone Number
+            </label>
             <input
               {...register('personal.phone')}
+              type="tel"
+              onInput={(e) => {
+                const input = e.target as HTMLInputElement;
+                input.value = input.value.replace(/[^0-9+\-() ]/g, '');
+              }}
               className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
               placeholder="+1 (555) 123-4567"
             />
@@ -191,7 +215,9 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
             )}
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-2">Address</label>
+            <label className="block text-xs font-medium text-gray-500 mb-2">
+              Address
+            </label>
             <input
               {...register('personal.address')}
               className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
@@ -203,8 +229,12 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
 
       {/* Summary Card */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-2">Professional Summary</h2>
-        <p className="text-xs text-gray-500 mb-4">Brief overview of your professional background and goals</p>
+        <h2 className="text-lg font-semibold text-gray-900 mb-2">
+          Professional Summary
+        </h2>
+        <p className="text-xs text-gray-500 mb-4">
+          Brief overview of your professional background and goals
+        </p>
         <textarea
           {...register('summary')}
           className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none resize-none"
@@ -217,8 +247,12 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-6">
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Work Experience</h2>
-            <p className="text-xs text-gray-500 mt-1">Add your professional work history</p>
+            <h2 className="text-lg font-semibold text-gray-900">
+              Work Experience
+            </h2>
+            <p className="text-xs text-gray-500 mt-1">
+              Add your professional work history
+            </p>
           </div>
           <button
             type="button"
@@ -230,43 +264,73 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
         </div>
         <div className="space-y-4">
           {experience.map((_, index) => (
-            <div key={index} className="bg-gray-50 rounded-lg p-5 border border-gray-100">
+            <div
+              key={index}
+              className="bg-gray-50 rounded-lg p-5 border border-gray-100"
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-2">Job Title</label>
+                  <label className="block text-xs font-medium text-gray-500 mb-2">
+                    Job Title
+                  </label>
                   <input
                     {...register(`experience.${index}.title`)}
                     placeholder="Software Engineer"
                     className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
                   />
+                  {errors.experience?.[index]?.title && (
+                    <p className="text-red-500 text-xs mt-1.5">
+                      {errors.experience[index]?.title?.message}
+                    </p>
+                  )}
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-2">Company</label>
+                  <label className="block text-xs font-medium text-gray-500 mb-2">
+                    Company
+                  </label>
                   <input
                     {...register(`experience.${index}.company`)}
                     placeholder="Tech Corp"
                     className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
                   />
+                  {errors.experience?.[index]?.company && (
+                    <p className="text-red-500 text-xs mt-1.5">
+                      {errors.experience[index]?.company?.message}
+                    </p>
+                  )}
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-2">Start Date</label>
+                  <label className="block text-xs font-medium text-gray-500 mb-2">
+                    Start Date
+                  </label>
                   <input
                     {...register(`experience.${index}.startDate`)}
                     type="date"
-                    className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+                    onClick={(e) => e.currentTarget.showPicker()}
+                    className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none cursor-pointer"
                   />
+                  {errors.experience?.[index]?.startDate && (
+                    <p className="text-red-500 text-xs mt-1.5">
+                      {errors.experience[index]?.startDate?.message}
+                    </p>
+                  )}
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-2">End Date</label>
+                  <label className="block text-xs font-medium text-gray-500 mb-2">
+                    End Date
+                  </label>
                   <input
                     {...register(`experience.${index}.endDate`)}
                     type="date"
-                    className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+                    onClick={(e) => e.currentTarget.showPicker()}
+                    className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none cursor-pointer"
                   />
                 </div>
               </div>
               <div className="mt-4">
-                <label className="block text-xs font-medium text-gray-500 mb-2">Description</label>
+                <label className="block text-xs font-medium text-gray-500 mb-2">
+                  Description
+                </label>
                 <textarea
                   {...register(`experience.${index}.description`)}
                   placeholder="Describe your responsibilities and achievements..."
@@ -274,15 +338,13 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
                   rows={3}
                 />
               </div>
-              {experience.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeExperience(index)}
-                  className="mt-3 text-sm text-red-600 hover:text-red-700 font-medium"
-                >
-                  Remove Experience
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => removeExperience(index)}
+                className="mt-3 text-sm text-red-600 hover:text-red-700 font-medium"
+              >
+                Remove Experience
+              </button>
             </div>
           ))}
         </div>
@@ -293,7 +355,9 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
         <div className="flex items-center justify-between mb-5">
           <div>
             <h2 className="text-lg font-semibold text-gray-900">Education</h2>
-            <p className="text-xs text-gray-500 mt-1">Add your educational background</p>
+            <p className="text-xs text-gray-500 mt-1">
+              Add your educational background
+            </p>
           </div>
           <button
             type="button"
@@ -305,31 +369,56 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
         </div>
         <div className="space-y-4">
           {education.map((_, index) => (
-            <div key={index} className="bg-gray-50 rounded-lg p-5 border border-gray-100">
+            <div
+              key={index}
+              className="bg-gray-50 rounded-lg p-5 border border-gray-100"
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-2">Degree</label>
+                  <label className="block text-xs font-medium text-gray-500 mb-2">
+                    Degree
+                  </label>
                   <input
                     {...register(`education.${index}.degree`)}
                     placeholder="Bachelor of Science in Computer Science"
                     className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
                   />
+                  {errors.education?.[index]?.degree && (
+                    <p className="text-red-500 text-xs mt-1.5">
+                      {errors.education[index]?.degree?.message}
+                    </p>
+                  )}
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-2">School</label>
+                  <label className="block text-xs font-medium text-gray-500 mb-2">
+                    School
+                  </label>
                   <input
                     {...register(`education.${index}.school`)}
                     placeholder="University Name"
                     className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
                   />
+                  {errors.education?.[index]?.school && (
+                    <p className="text-red-500 text-xs mt-1.5">
+                      {errors.education[index]?.school?.message}
+                    </p>
+                  )}
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-medium text-gray-500 mb-2">Graduation Date</label>
+                  <label className="block text-xs font-medium text-gray-500 mb-2">
+                    Graduation Date
+                  </label>
                   <input
                     {...register(`education.${index}.graduationDate`)}
                     type="date"
-                    className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+                    onClick={(e) => e.currentTarget.showPicker()}
+                    className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none cursor-pointer"
                   />
+                  {errors.education?.[index]?.graduationDate && (
+                    <p className="text-red-500 text-xs mt-1.5">
+                      {errors.education[index]?.graduationDate?.message}
+                    </p>
+                  )}
                 </div>
               </div>
               {education.length > 1 && (
@@ -349,11 +438,15 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
       {/* Skills Section */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-2">Skills</h2>
-        <p className="text-xs text-gray-500 mb-5">Add your technical and soft skills</p>
-        
+        <p className="text-xs text-gray-500 mb-5">
+          Add your technical and soft skills
+        </p>
+
         {/* Technical Skills */}
         <div className="mb-5">
-          <label className="block text-xs font-medium text-gray-700 mb-2">Quick Add: Technical Skills</label>
+          <label className="block text-xs font-medium text-gray-700 mb-2">
+            Quick Add: Technical Skills
+          </label>
           <select
             onChange={(e) => {
               if (e.target.value) {
@@ -406,7 +499,9 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
 
         {/* Soft Skills */}
         <div className="mb-5">
-          <label className="block text-xs font-medium text-gray-700 mb-2">Quick Add: Soft Skills</label>
+          <label className="block text-xs font-medium text-gray-700 mb-2">
+            Quick Add: Soft Skills
+          </label>
           <select
             onChange={(e) => {
               if (e.target.value) {
@@ -432,7 +527,9 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
         {/* All Skills Display */}
         <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-100 min-h-[80px]">
           {skills.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-4">No skills added yet</p>
+            <p className="text-sm text-gray-400 text-center py-4">
+              No skills added yet
+            </p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {skills.map((skill, index) => (
@@ -488,8 +585,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
       {/* Save Button */}
       <div className="flex justify-end pt-2">
         <button
-          type="button"
-          onClick={() => onSave?.()}
+          type="submit"
           className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm hover:shadow-md transition-all"
         >
           Save Resume
