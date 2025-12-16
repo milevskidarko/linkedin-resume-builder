@@ -63,13 +63,18 @@ function isValidPayload(body: unknown): body is ResumePayload {
 
 export async function GET(req: NextRequest) {
   try {
+    console.log('[API /resumes GET] Starting request');
     const session = await getSession();
+    console.log('[API /resumes GET] Session:', session ? 'exists' : 'null', session?.user?.sub);
     
     if (!session?.user) {
+      console.log('[API /resumes GET] No session found, returning 401');
       return NextResponse.json({ error: "Unauthorized", details: "No session found" }, { status: 401 });
     }
     
+    console.log('[API /resumes GET] Getting user:', session.user.sub, session.user.email);
     const dbUser = await getOrCreateUser(session.user.sub, session.user.email);
+    console.log('[API /resumes GET] DB User:', dbUser.id);
 
     const resumes = await prisma.resume.findMany({
       where: { userId: dbUser.id },
@@ -97,9 +102,12 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  console.log('[API /resumes POST] Starting request');
   const session = await getSession();
+  console.log('[API /resumes POST] Session:', session ? 'exists' : 'null', session?.user?.sub);
   
   if (!session?.user) {
+    console.log('[API /resumes POST] No session found, returning 401');
     return NextResponse.json({ error: "Unauthorized", details: "No session found" }, { status: 401 });
   }
 

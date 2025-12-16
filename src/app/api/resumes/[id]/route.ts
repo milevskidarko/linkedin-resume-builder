@@ -49,9 +49,12 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  console.log('[API /resumes/[id] GET] Starting request for id:', id);
   const session = await getSession();
+  console.log('[API /resumes/[id] GET] Session:', session ? 'exists' : 'null', session?.user?.sub);
   
   if (!session?.user) {
+    console.log('[API /resumes/[id] GET] No session found, returning 401');
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   
@@ -104,9 +107,12 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  console.log('[API /resumes/[id] PUT] Starting request for id:', id);
   const session = await getSession();
+  console.log('[API /resumes/[id] PUT] Session:', session ? 'exists' : 'null', session?.user?.sub);
   
   if (!session?.user) {
+    console.log('[API /resumes/[id] PUT] No session found, returning 401');
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
