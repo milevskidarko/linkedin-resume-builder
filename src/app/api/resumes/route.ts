@@ -62,26 +62,30 @@ function isValidPayload(body: unknown): body is ResumePayload {
 }
 
 export async function GET(req: NextRequest) {
-  // TODO: Fix Auth0 session in API routes for Next.js 15
-  // const session = await getSession();
-  // For now, using mock user until Auth0 API route session is fixed
-  const mockUser = { sub: "mock-user-id", email: "user@example.com" };
-  
-  const dbUser = await getOrCreateUser(mockUser.sub, mockUser.email);
+  try {
+    // TODO: Fix Auth0 session in API routes for Next.js 15
+    // const session = await getSession();
+    // For now, using mock user until Auth0 API route session is fixed
+    const mockUser = { sub: "mock-user-id", email: "user@example.com" };
+    
+    const dbUser = await getOrCreateUser(mockUser.sub, mockUser.email);
 
-  const resumes = await prisma.resume.findMany({
-    where: { userId: dbUser.id },
-    orderBy: { updatedAt: "desc" },
-    select: {
-      id: true,
-      name: true,
-      summary: true,
-      updatedAt: true,
-      createdAt: true,
-    },
-  });
+    const resumes = await prisma.resume.findMany({
+      where: { userId: dbUser.id },
+      orderBy: { updatedAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        summary: true,
+        updatedAt: true,
+        createdAt: true,
+      },
+    });
 
-  return NextResponse.json({ resumes });
+    return NextResponse.json({ resumes });
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to fetch resumes", details: error instanceof Error ? error.message : "Unknown error" }, { status: 500 });
+  }
 }
 
 export async function POST(req: NextRequest) {
