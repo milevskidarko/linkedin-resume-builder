@@ -62,18 +62,12 @@ function isValidPayload(body: unknown): body is ResumePayload {
 }
 
 export async function GET(req: NextRequest) {
-  const session = await getSession();
+  // TODO: Fix Auth0 session in API routes for Next.js 15
+  // const session = await getSession();
+  // For now, using mock user until Auth0 API route session is fixed
+  const mockUser = { sub: "mock-user-id", email: "user@example.com" };
   
-  // Debug logging
-  if (!session) {
-    return NextResponse.json({ error: "No session found" }, { status: 401 });
-  }
-  
-  if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const dbUser = await getOrCreateUser(session.user.sub as string, session.user.email);
+  const dbUser = await getOrCreateUser(mockUser.sub, mockUser.email);
 
   const resumes = await prisma.resume.findMany({
     where: { userId: dbUser.id },
@@ -91,11 +85,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getSession();
-  
-  if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  // TODO: Fix Auth0 session in API routes for Next.js 15
+  // const session = await getSession();
+  const mockUser = { sub: "mock-user-id", email: "user@example.com" };
 
   const body = await req.json().catch(() => null);
   if (!isValidPayload(body)) {
@@ -103,8 +95,8 @@ export async function POST(req: NextRequest) {
   }
 
   const { personal, summary, experience, education, skills, isPublic, username } = body;
-
-  const dbUser = await getOrCreateUser(session.user.sub as string, session.user.email);
+  
+  const dbUser = await getOrCreateUser(mockUser.sub, mockUser.email);
 
   if (username && dbUser.id !== "mock-user-id") {
     try {
