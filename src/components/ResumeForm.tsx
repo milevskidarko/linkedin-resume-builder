@@ -36,11 +36,13 @@ export type ResumeFormData = z.infer<typeof resumeSchema>;
 
 type ResumeFormProps = {
   onChange: (data: ResumeFormData) => void;
+  onSave?: () => void;
   initialData?: ResumeFormData | null;
 };
 
 const ResumeForm: React.FC<ResumeFormProps> = ({
   onChange,
+  onSave,
   initialData,
 }: ResumeFormProps) => {
   const {
@@ -97,7 +99,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
   const skills = watch('skills');
 
   const onSubmit = (data: ResumeFormData) => {
-    console.log(data);
+    onChange(data);
   };
 
   const addExperience = () => {
@@ -486,7 +488,8 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
       {/* Save Button */}
       <div className="flex justify-end pt-2">
         <button
-          type="submit"
+          type="button"
+          onClick={() => onSave?.()}
           className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm hover:shadow-md transition-all"
         >
           Save Resume

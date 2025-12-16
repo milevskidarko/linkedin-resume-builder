@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useRef } from "react";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+import { useRef } from 'react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 type ResumeData = {
   personal: {
@@ -27,50 +27,50 @@ type ResumeData = {
   skills: string[];
 };
 
-export type ResumeTheme = "classic" | "modern" | "professional" | "minimal";
+export type ResumeTheme = 'classic' | 'modern' | 'professional' | 'minimal';
 
 const themes = {
   classic: {
-    primary: "#1e40af",
-    secondary: "#64748b",
-    text: "#1f2937",
-    accent: "#2563eb",
-    border: "#2563eb",
-    lightGray: "#e5e7eb",
+    primary: '#1e40af',
+    secondary: '#64748b',
+    text: '#1f2937',
+    accent: '#2563eb',
+    border: '#2563eb',
+    lightGray: '#e5e7eb',
   },
   modern: {
-    primary: "#0d9488",
-    secondary: "#64748b",
-    text: "#0f172a",
-    accent: "#14b8a6",
-    border: "#14b8a6",
-    lightGray: "#e5e7eb",
+    primary: '#0d9488',
+    secondary: '#64748b',
+    text: '#0f172a',
+    accent: '#14b8a6',
+    border: '#14b8a6',
+    lightGray: '#e5e7eb',
   },
   professional: {
-    primary: "#1e3a8a",
-    secondary: "#64748b",
-    text: "#1f2937",
-    accent: "#1e40af",
-    border: "#1e3a8a",
-    lightGray: "#e5e7eb",
+    primary: '#1e3a8a',
+    secondary: '#64748b',
+    text: '#1f2937',
+    accent: '#1e40af',
+    border: '#1e3a8a',
+    lightGray: '#e5e7eb',
   },
   minimal: {
-    primary: "#000000",
-    secondary: "#64748b",
-    text: "#111827",
-    accent: "#374151",
-    border: "#000000",
-    lightGray: "#e5e7eb",
+    primary: '#000000',
+    secondary: '#64748b',
+    text: '#111827',
+    accent: '#374151',
+    border: '#000000',
+    lightGray: '#e5e7eb',
   },
 };
 
-export default function ResumePreview({ 
-  formData, 
-  showPrintButton, 
-  theme = "classic" 
-}: { 
-  formData: ResumeData; 
-  showPrintButton?: boolean; 
+export default function ResumePreview({
+  formData,
+  showPrintButton,
+  theme = 'classic',
+}: {
+  formData: ResumeData;
+  showPrintButton?: boolean;
   theme?: ResumeTheme;
 }) {
   const previewRef = useRef<HTMLDivElement>(null);
@@ -79,10 +79,8 @@ export default function ResumePreview({
   const downloadPDF = async () => {
     try {
       if (!previewRef.current) {
-        console.error("No preview ref");
         return;
       }
-      console.log("Starting PDF generation");
       const canvas = await html2canvas(previewRef.current, {
         useCORS: true,
         allowTaint: true,
@@ -92,23 +90,21 @@ export default function ResumePreview({
         width: 800,
         height: 600,
       });
-      console.log("Canvas created", canvas);
-      const imgData = canvas.toDataURL("image/png");
+      const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF();
       const imgWidth = 210;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
       if (imgHeight > 295) {
         const scale = 295 / imgHeight;
-        pdf.addImage(imgData, "PNG", 0, 0, imgWidth * scale, 295);
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth * scale, 295);
       } else {
-        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
       }
 
-      pdf.save("resume.pdf");
-      console.log("PDF saved");
+      pdf.save('resume.pdf');
     } catch (error) {
-      console.error("Error generating PDF", error);
+      // PDF generation failed
     }
   };
 
@@ -135,42 +131,54 @@ export default function ResumePreview({
         }}
       >
         {/* Hero Header */}
-        <div style={{ 
-          marginBottom: '32px',
-          borderLeft: `4px solid ${colors.border}`,
-          paddingLeft: '16px',
-        }}>
-          <h1 style={{ 
-            fontSize: '2.5rem', 
-            fontWeight: '600', 
-            marginBottom: '8px',
-            color: colors.primary,
-            letterSpacing: '-0.025em',
-            lineHeight: '1.2',
-          }}>
+        <div
+          style={{
+            marginBottom: '32px',
+            borderLeft: `4px solid ${colors.border}`,
+            paddingLeft: '16px',
+          }}
+        >
+          <h1
+            style={{
+              fontSize: '2.5rem',
+              fontWeight: '600',
+              marginBottom: '8px',
+              color: colors.primary,
+              letterSpacing: '-0.025em',
+              lineHeight: '1.2',
+            }}
+          >
             {formData.personal.name}
           </h1>
-          
-          <div style={{ 
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '16px',
-            color: colors.secondary,
-            fontSize: '0.95rem',
-            marginTop: '12px',
-          }}>
+
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '16px',
+              color: colors.secondary,
+              fontSize: '0.95rem',
+              marginTop: '12px',
+            }}
+          >
             {formData.personal.email && (
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span
+                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
                 ✉ {formData.personal.email}
               </span>
             )}
             {formData.personal.phone && (
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span
+                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
                 📞 {formData.personal.phone}
               </span>
             )}
             {formData.personal.address && (
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span
+                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
                 📍 {formData.personal.address}
               </span>
             )}
@@ -180,21 +188,25 @@ export default function ResumePreview({
         {/* Summary */}
         {formData.summary && (
           <div style={{ marginBottom: '32px' }}>
-            <h2 style={{ 
-              fontSize: '0.875rem', 
-              fontWeight: '700',
-              color: colors.text,
-              marginBottom: '12px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-            }}>
+            <h2
+              style={{
+                fontSize: '0.875rem',
+                fontWeight: '700',
+                color: colors.text,
+                marginBottom: '12px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
               SUMMARY
             </h2>
-            <p style={{ 
-              color: colors.text,
-              lineHeight: '1.7',
-              fontSize: '0.95rem',
-            }}>
+            <p
+              style={{
+                color: colors.text,
+                lineHeight: '1.7',
+                fontSize: '0.95rem',
+              }}
+            >
               {formData.summary}
             </p>
           </div>
@@ -202,50 +214,61 @@ export default function ResumePreview({
 
         {/* Experience */}
         <div style={{ marginBottom: '32px' }}>
-          <h2 style={{ 
-            fontSize: '0.875rem', 
-            fontWeight: '700',
-            color: colors.text,
-            marginBottom: '16px',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-          }}>
+          <h2
+            style={{
+              fontSize: '0.875rem',
+              fontWeight: '700',
+              color: colors.text,
+              marginBottom: '16px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+            }}
+          >
             EXPERIENCE
           </h2>
           {formData.experience.map((exp, index) => (
             <div key={index} style={{ marginBottom: '20px' }}>
               <div style={{ marginBottom: '4px' }}>
-                <span style={{ 
-                  fontWeight: '600',
-                  fontSize: '1.05rem',
-                  color: colors.text,
-                }}>
-                  {exp.title}
-                </span>
-                {exp.company && (
-                  <span style={{ 
+                <span
+                  style={{
                     fontWeight: '600',
                     fontSize: '1.05rem',
                     color: colors.text,
-                  }}>
-                    {' — '}{exp.company}
+                  }}
+                >
+                  {exp.title}
+                </span>
+                {exp.company && (
+                  <span
+                    style={{
+                      fontWeight: '600',
+                      fontSize: '1.05rem',
+                      color: colors.text,
+                    }}
+                  >
+                    {' — '}
+                    {exp.company}
                   </span>
                 )}
               </div>
-              <p style={{ 
-                fontSize: '0.875rem', 
-                color: colors.secondary,
-                marginBottom: '8px',
-              }}>
-                {exp.startDate} – {exp.endDate || "Present"}
+              <p
+                style={{
+                  fontSize: '0.875rem',
+                  color: colors.secondary,
+                  marginBottom: '8px',
+                }}
+              >
+                {exp.startDate} – {exp.endDate || 'Present'}
               </p>
               {exp.description && (
-                <p style={{ 
-                  color: colors.text,
-                  lineHeight: '1.6',
-                  fontSize: '0.9rem',
-                  paddingLeft: '16px',
-                }}>
+                <p
+                  style={{
+                    color: colors.text,
+                    lineHeight: '1.6',
+                    fontSize: '0.9rem',
+                    paddingLeft: '16px',
+                  }}
+                >
                   • {exp.description}
                 </p>
               )}
@@ -255,30 +278,36 @@ export default function ResumePreview({
 
         {/* Education */}
         <div style={{ marginBottom: '32px' }}>
-          <h2 style={{ 
-            fontSize: '0.875rem', 
-            fontWeight: '700',
-            color: colors.text,
-            marginBottom: '16px',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-          }}>
+          <h2
+            style={{
+              fontSize: '0.875rem',
+              fontWeight: '700',
+              color: colors.text,
+              marginBottom: '16px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+            }}
+          >
             EDUCATION
           </h2>
           {formData.education.map((edu, index) => (
             <div key={index} style={{ marginBottom: '12px' }}>
-              <h3 style={{ 
-                fontWeight: '600',
-                fontSize: '1rem',
-                color: colors.text,
-                marginBottom: '2px',
-              }}>
+              <h3
+                style={{
+                  fontWeight: '600',
+                  fontSize: '1rem',
+                  color: colors.text,
+                  marginBottom: '2px',
+                }}
+              >
                 {edu.degree}
               </h3>
-              <p style={{ 
-                color: colors.secondary,
-                fontSize: '0.9rem',
-              }}>
+              <p
+                style={{
+                  color: colors.secondary,
+                  fontSize: '0.9rem',
+                }}
+              >
                 {edu.school} — {edu.graduationDate}
               </p>
             </div>
@@ -287,25 +316,29 @@ export default function ResumePreview({
 
         {/* Skills */}
         <div>
-          <h2 style={{ 
-            fontSize: '0.875rem', 
-            fontWeight: '700',
-            color: colors.text,
-            marginBottom: '12px',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-          }}>
+          <h2
+            style={{
+              fontSize: '0.875rem',
+              fontWeight: '700',
+              color: colors.text,
+              marginBottom: '12px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+            }}
+          >
             SKILLS
           </h2>
-          <div style={{ 
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '8px',
-          }}>
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '8px',
+            }}
+          >
             {formData.skills.map((skill, index) => (
-              <span 
+              <span
                 key={index}
-                style={{ 
+                style={{
                   backgroundColor: '#f3f4f6',
                   color: colors.text,
                   padding: '6px 14px',

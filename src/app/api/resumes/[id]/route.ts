@@ -1,8 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/auth";
+import { withApiAuthRequired, getSession } from "@auth0/nextjs-auth0";
 
-export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 type ResumePayload = {
@@ -44,11 +43,17 @@ function isValidPayload(body: unknown): body is ResumePayload {
   return true;
 }
 
-export const GET = requireAuth(async (req: NextRequest, user: any, context: { params: Promise<{ id: string }> }) => {
+export const GET = withApiAuthRequired(async function GET(req, context) {
   const params = await context.params;
+  const res = new NextResponse();
+  const session = await getSession(undefined, res);
+  
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const resume = await prisma.resume.findFirst({
-    where: { id: params.id, user: { auth0Sub: user.sub as string } },
+    where: { id: params.id, user: { auth0Sub: session.user.sub as string } },
     include: {
       user: { select: { username: true } },
       experiences: { orderBy: { sort: "asc" } },
@@ -91,8 +96,14 @@ export const GET = requireAuth(async (req: NextRequest, user: any, context: { pa
   );
 });
 
-export const PUT = requireAuth(async (req: NextRequest, user: any, context: { params: Promise<{ id: string }> }) => {
+export const PUT = withApiAuthRequired(async function PUT(req, context) {
   const params = await context.params;
+  const res = new NextResponse();
+  const session = await getSession(undefined, res);
+  
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const body = await req.json().catch(() => null);
   if (!isValidPayload(body)) {
@@ -102,7 +113,7 @@ export const PUT = requireAuth(async (req: NextRequest, user: any, context: { pa
   const { personal, summary, experience, education, skills, isPublic, username } = body;
 
   const existing = await prisma.resume.findFirst({
-    where: { id: params.id, user: { auth0Sub: user.sub as string } },
+    where: { id: params.id, user: { auth0Sub: session.user.sub as string } },
   });
 
   if (!existing) {
@@ -111,7 +122,7 @@ export const PUT = requireAuth(async (req: NextRequest, user: any, context: { pa
 
   if (username !== undefined) {
     await prisma.user.update({
-      where: { auth0Sub: user.sub as string },
+      where: { auth0Sub: session.user.sub as string },
       data: { username: username || null },
     });
   }

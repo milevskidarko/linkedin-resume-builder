@@ -1,8 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/auth";
+import { withApiAuthRequired, getSession } from "@auth0/nextjs-auth0";
 
-export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 type ResumePayload = {
@@ -38,7 +37,6 @@ async function getOrCreateUser(auth0Sub: string, email?: string | null) {
       create: { auth0Sub, email: email ?? undefined },
     });
   } catch (e) {
-    console.warn("Database unavailable, using mock user:", e);
     return {
       id: "mock-user-id",
       auth0Sub,
@@ -62,8 +60,15 @@ function isValidPayload(body: unknown): body is ResumePayload {
   return true;
 }
 
-export const GET = requireAuth(async (req: NextRequest, user: any) => {
-  const dbUser = await getOrCreateUser(user.sub as string, user.email);
+export const GET = withApiAuthRequired(async function GET() {
+  const res = new NextResponse();
+  const session = await getSession(undefined, res);
+  
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const dbUser = await getOrCreateUser(session.user.sub as string, session.user.email);
 
   const resumes = await prisma.resume.findMany({
     where: { userId: dbUser.id },
@@ -80,7 +85,14 @@ export const GET = requireAuth(async (req: NextRequest, user: any) => {
   return NextResponse.json({ resumes });
 });
 
-export const POST = requireAuth(async (req: NextRequest, user: any) => {
+export const POST = withApiAuthRequired(async function POST(req) {
+  const res = new NextResponse();
+  const session = await getSession(undefined, res);
+  
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const body = await req.json().catch(() => null);
   if (!isValidPayload(body)) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
@@ -88,7 +100,7 @@ export const POST = requireAuth(async (req: NextRequest, user: any) => {
 
   const { personal, summary, experience, education, skills, isPublic, username } = body;
 
-  const dbUser = await getOrCreateUser(user.sub as string, user.email);
+  const dbUser = await getOrCreateUser(session.user.sub as string, session.user.email);
 
   if (username && dbUser.id !== "mock-user-id") {
     try {
@@ -97,7 +109,7 @@ export const POST = requireAuth(async (req: NextRequest, user: any) => {
         data: { username: username || null },
       });
     } catch (e) {
-      console.warn("Could not update username:", e);
+      // Username update failed
     }
   }
 
@@ -136,7 +148,6 @@ export const POST = requireAuth(async (req: NextRequest, user: any) => {
     });
     return NextResponse.json({ id: resume.id, isPublic: resume.isPublic, username }, { status: 201 });
   } catch (e) {
-    console.warn("Database save failed, returning mock response:", e);
     return NextResponse.json(
       { id: "mock-resume-" + Math.random().toString(36).slice(2, 9), isPublic: isPublic ?? false, username },
       { status: 201 }
