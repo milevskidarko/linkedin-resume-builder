@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getSession } from "@auth0/nextjs-auth0";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const MOCK_USER_SUB = "dev-user-123";
-const MOCK_USER_EMAIL = "dev@example.com";
 
 type ResumePayload = {
   personal: {
@@ -33,7 +31,11 @@ type ResumePayload = {
 };
 
 async function requireSession(req: NextRequest) {
-  return { session: { user: { sub: MOCK_USER_SUB, email: MOCK_USER_EMAIL } } } as const;
+  const session = await getSession();
+  if (!session?.user) {
+    throw new Error("Unauthorized");
+  }
+  return { session };
 }
 
 async function getOrCreateUser(auth0Sub: string, email?: string | null) {
