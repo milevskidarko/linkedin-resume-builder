@@ -60,9 +60,8 @@ function isValidPayload(body: unknown): body is ResumePayload {
   return true;
 }
 
-export const GET = withApiAuthRequired(async function GET() {
-  const res = new NextResponse();
-  const session = await getSession(undefined, res);
+export const GET = withApiAuthRequired(async function GET(req) {
+  const session = await getSession(req, new NextResponse());
   
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -86,8 +85,7 @@ export const GET = withApiAuthRequired(async function GET() {
 });
 
 export const POST = withApiAuthRequired(async function POST(req) {
-  const res = new NextResponse();
-  const session = await getSession(undefined, res);
+  const session = await getSession(req, new NextResponse());
   
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
