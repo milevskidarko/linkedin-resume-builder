@@ -29,11 +29,13 @@ export function useMockAuth(): {
   const login = () => {
     localStorage.setItem('mockAuthUser', JSON.stringify(mockSession.user));
     setUser(mockSession.user);
+    window.location.reload();
   };
   
   const logout = () => {
     localStorage.removeItem('mockAuthUser');
     setUser(null);
+    window.location.reload();
   };
   
   return {
