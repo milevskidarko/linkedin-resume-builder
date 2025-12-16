@@ -1,5 +1,5 @@
 import { Session } from "@auth0/nextjs-auth0";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export const mockSession: Session = {
   user: {
@@ -18,10 +18,28 @@ export function useMockAuth(): {
 } {
   const [user, setUser] = useState<typeof mockSession.user | null>(null);
   
+  useEffect(() => {
+    // Check localStorage on mount
+    const stored = localStorage.getItem('mockAuthUser');
+    if (stored) {
+      setUser(JSON.parse(stored));
+    }
+  }, []);
+  
+  const login = () => {
+    localStorage.setItem('mockAuthUser', JSON.stringify(mockSession.user));
+    setUser(mockSession.user);
+  };
+  
+  const logout = () => {
+    localStorage.removeItem('mockAuthUser');
+    setUser(null);
+  };
+  
   return {
     user,
     isLoading: false,
-    login: () => setUser(mockSession.user),
-    logout: () => setUser(null),
+    login,
+    logout,
   };
 }
