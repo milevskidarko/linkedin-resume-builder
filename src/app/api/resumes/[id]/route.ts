@@ -50,7 +50,7 @@ export async function GET(
 ) {
   const { id } = await params;
   // TODO: Fix Auth0 session in API routes
-  const mockUser = { sub: "mock-user-id" };
+  const mockUser = { sub: "google-oauth2|116131741438785734564" };
   
   const resume = await prisma.resume.findFirst({
     where: { id, user: { auth0Sub: mockUser.sub } },
@@ -102,7 +102,7 @@ export async function PUT(
 ) {
   const { id } = await params;
   // TODO: Fix Auth0 session
-  const mockUser = { sub: "mock-user-id" };
+  const mockUser = { sub: "google-oauth2|116131741438785734564" };
 
   const body = await req.json().catch(() => null);
   if (!isValidPayload(body)) {

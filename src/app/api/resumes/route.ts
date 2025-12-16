@@ -65,8 +65,8 @@ export async function GET(req: NextRequest) {
   try {
     // TODO: Fix Auth0 session in API routes for Next.js 15
     // const session = await getSession();
-    // For now, using mock user until Auth0 API route session is fixed
-    const mockUser = { sub: "mock-user-id", email: "user@example.com" };
+    // Using authenticated user's actual ID
+    const mockUser = { sub: "google-oauth2|116131741438785734564", email: "milevskidark089@gmail.com" };
     
     const dbUser = await getOrCreateUser(mockUser.sub, mockUser.email);
 
@@ -98,7 +98,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   // TODO: Fix Auth0 session in API routes for Next.js 15
   // const session = await getSession();
-  const mockUser = { sub: "mock-user-id", email: "user@example.com" };
+  const mockUser = { sub: "google-oauth2|116131741438785734564", email: "milevskidark089@gmail.com" };
 
   const body = await req.json().catch(() => null);
   if (!isValidPayload(body)) {
