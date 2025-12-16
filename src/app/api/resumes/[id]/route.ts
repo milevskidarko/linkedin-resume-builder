@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { withApiAuthRequired, getSession } from "@auth0/nextjs-auth0";
+import { getSession } from "@auth0/nextjs-auth0";
 
 export const dynamic = "force-dynamic";
 
@@ -43,8 +43,11 @@ function isValidPayload(body: unknown): body is ResumePayload {
   return true;
 }
 
-export const GET = withApiAuthRequired(async function GET(req, context) {
-  const params = await context.params;
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
   const session = await getSession();
   
   if (!session?.user) {
@@ -52,7 +55,7 @@ export const GET = withApiAuthRequired(async function GET(req, context) {
   }
 
   const resume = await prisma.resume.findFirst({
-    where: { id: params.id, user: { auth0Sub: session.user.sub as string } },
+    where: { id, user: { auth0Sub: session.user.sub as string } },
     include: {
       user: { select: { username: true } },
       experiences: { orderBy: { sort: "asc" } },
@@ -93,10 +96,13 @@ export const GET = withApiAuthRequired(async function GET(req, context) {
       updatedAt: resume.updatedAt,
     }
   );
-});
+}
 
-export const PUT = withApiAuthRequired(async function PUT(req, context) {
-  const params = await context.params;
+export async function PUT(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
   const session = await getSession();
   
   if (!session?.user) {
@@ -111,7 +117,7 @@ export const PUT = withApiAuthRequired(async function PUT(req, context) {
   const { personal, summary, experience, education, skills, isPublic, username } = body;
 
   const existing = await prisma.resume.findFirst({
-    where: { id: params.id, user: { auth0Sub: session.user.sub as string } },
+    where: { id, user: { auth0Sub: session.user.sub as string } },
   });
 
   if (!existing) {
@@ -127,12 +133,12 @@ export const PUT = withApiAuthRequired(async function PUT(req, context) {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await prisma.$transaction(async (tx: any) => {
-    await tx.experience.deleteMany({ where: { resumeId: params.id } });
-    await tx.education.deleteMany({ where: { resumeId: params.id } });
-    await tx.skill.deleteMany({ where: { resumeId: params.id } });
+    await tx.experience.deleteMany({ where: { resumeId: id } });
+    await tx.education.deleteMany({ where: { resumeId: id } });
+    await tx.skill.deleteMany({ where: { resumeId: id } });
 
     await tx.resume.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         name: personal.name,
         email: personal.email,
@@ -166,4 +172,4 @@ export const PUT = withApiAuthRequired(async function PUT(req, context) {
   });
 
   return NextResponse.json({ ok: true });
-});
+}

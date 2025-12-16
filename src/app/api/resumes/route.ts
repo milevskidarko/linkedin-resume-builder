@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { withApiAuthRequired, getSession } from "@auth0/nextjs-auth0";
+import { getSession } from "@auth0/nextjs-auth0";
 
 export const dynamic = "force-dynamic";
 
@@ -60,7 +60,7 @@ function isValidPayload(body: unknown): body is ResumePayload {
   return true;
 }
 
-export const GET = withApiAuthRequired(async function GET(req) {
+export async function GET() {
   const session = await getSession();
   
   if (!session?.user) {
@@ -82,9 +82,9 @@ export const GET = withApiAuthRequired(async function GET(req) {
   });
 
   return NextResponse.json({ resumes });
-});
+}
 
-export const POST = withApiAuthRequired(async function POST(req) {
+export async function POST(req: Request) {
   const session = await getSession();
   
   if (!session?.user) {
@@ -151,4 +151,4 @@ export const POST = withApiAuthRequired(async function POST(req) {
       { status: 201 }
     );
   }
-});
+}
