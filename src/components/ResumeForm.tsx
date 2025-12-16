@@ -143,264 +143,312 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold mb-2">Personal Information</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      {/* Personal Information Card */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-5">Personal Information</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label className="block text-sm font-medium">Name</label>
+            <label className="block text-xs font-medium text-gray-500 mb-2">Full Name</label>
             <input
               {...register('personal.name')}
-              className="w-full p-2 border rounded"
+              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+              placeholder="John Doe"
             />
             {errors.personal?.name && (
-              <p className="text-red-500 text-sm">
+              <p className="text-red-500 text-xs mt-1.5">
                 {errors.personal.name.message}
               </p>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium">Email</label>
+            <label className="block text-xs font-medium text-gray-500 mb-2">Email Address</label>
             <input
               {...register('personal.email')}
               type="email"
-              className="w-full p-2 border rounded"
+              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+              placeholder="john@example.com"
             />
             {errors.personal?.email && (
-              <p className="text-red-500 text-sm">
+              <p className="text-red-500 text-xs mt-1.5">
                 {errors.personal.email.message}
               </p>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium">Phone</label>
+            <label className="block text-xs font-medium text-gray-500 mb-2">Phone Number</label>
             <input
               {...register('personal.phone')}
-              className="w-full p-2 border rounded"
+              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+              placeholder="+1 (555) 123-4567"
             />
             {errors.personal?.phone && (
-              <p className="text-red-500 text-sm">
+              <p className="text-red-500 text-xs mt-1.5">
                 {errors.personal.phone.message}
               </p>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium">Address</label>
+            <label className="block text-xs font-medium text-gray-500 mb-2">Address</label>
             <input
               {...register('personal.address')}
-              className="w-full p-2 border rounded"
+              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+              placeholder="City, Country"
             />
           </div>
         </div>
       </div>
 
-      <div>
-        <h2 className="text-xl font-semibold mb-2">Summary</h2>
+      {/* Summary Card */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-2">Professional Summary</h2>
+        <p className="text-xs text-gray-500 mb-4">Brief overview of your professional background and goals</p>
         <textarea
           {...register('summary')}
-          className="w-full p-2 border rounded"
+          className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none resize-none"
           rows={4}
+          placeholder="Passionate software developer with 5+ years of experience..."
         />
       </div>
 
-      <div>
-        <h2 className="text-xl font-semibold mb-2">Experience</h2>
-        {experience.map((_, index) => (
-          <div key={index} className="border p-4 mb-4 rounded">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input
-                {...register(`experience.${index}.title`)}
-                placeholder="Job Title"
-                className="p-2 border rounded"
-              />
-              <input
-                {...register(`experience.${index}.company`)}
-                placeholder="Company"
-                className="p-2 border rounded"
-              />
-              <input
-                {...register(`experience.${index}.startDate`)}
-                type="date"
-                className="p-2 border rounded"
-              />
-              <input
-                {...register(`experience.${index}.endDate`)}
-                type="date"
-                className="p-2 border rounded"
-              />
-            </div>
-            <textarea
-              {...register(`experience.${index}.description`)}
-              placeholder="Description"
-              className="w-full p-2 border rounded mt-2"
-              rows={3}
-            />
-            {experience.length > 1 && (
-              <button
-                type="button"
-                onClick={() => removeExperience(index)}
-                className="mt-2 text-red-500 hover:text-red-700"
-              >
-                Remove
-              </button>
-            )}
+      {/* Experience Section */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-6">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Work Experience</h2>
+            <p className="text-xs text-gray-500 mt-1">Add your professional work history</p>
           </div>
-        ))}
-        <button
-          type="button"
-          onClick={addExperience}
-          className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
-        >
-          Add Experience
-        </button>
+          <button
+            type="button"
+            onClick={addExperience}
+            className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+          >
+            <span>+</span> Add Experience
+          </button>
+        </div>
+        <div className="space-y-4">
+          {experience.map((_, index) => (
+            <div key={index} className="bg-gray-50 rounded-lg p-5 border border-gray-100">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-2">Job Title</label>
+                  <input
+                    {...register(`experience.${index}.title`)}
+                    placeholder="Software Engineer"
+                    className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-2">Company</label>
+                  <input
+                    {...register(`experience.${index}.company`)}
+                    placeholder="Tech Corp"
+                    className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-2">Start Date</label>
+                  <input
+                    {...register(`experience.${index}.startDate`)}
+                    type="date"
+                    className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-2">End Date</label>
+                  <input
+                    {...register(`experience.${index}.endDate`)}
+                    type="date"
+                    className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+                  />
+                </div>
+              </div>
+              <div className="mt-4">
+                <label className="block text-xs font-medium text-gray-500 mb-2">Description</label>
+                <textarea
+                  {...register(`experience.${index}.description`)}
+                  placeholder="Describe your responsibilities and achievements..."
+                  className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none resize-none"
+                  rows={3}
+                />
+              </div>
+              {experience.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeExperience(index)}
+                  className="mt-3 text-sm text-red-600 hover:text-red-700 font-medium"
+                >
+                  Remove Experience
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div>
-        <h2 className="text-xl font-semibold mb-2">Education</h2>
-        {education.map((_, index) => (
-          <div key={index} className="border p-4 mb-4 rounded">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input
-                {...register(`education.${index}.degree`)}
-                placeholder="Degree"
-                className="p-2 border rounded"
-              />
-              <input
-                {...register(`education.${index}.school`)}
-                placeholder="School"
-                className="p-2 border rounded"
-              />
-              <input
-                {...register(`education.${index}.graduationDate`)}
-                type="date"
-                className="p-2 border rounded"
-              />
-            </div>
-            {education.length > 1 && (
-              <button
-                type="button"
-                onClick={() => removeEducation(index)}
-                className="mt-2 text-red-500 hover:text-red-700"
-              >
-                Remove
-              </button>
-            )}
+      {/* Education Section */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-6">
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Education</h2>
+            <p className="text-xs text-gray-500 mt-1">Add your educational background</p>
           </div>
-        ))}
-        <button
-          type="button"
-          onClick={addEducation}
-          className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
-        >
-          Add Education
-        </button>
+          <button
+            type="button"
+            onClick={addEducation}
+            className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+          >
+            <span>+</span> Add Education
+          </button>
+        </div>
+        <div className="space-y-4">
+          {education.map((_, index) => (
+            <div key={index} className="bg-gray-50 rounded-lg p-5 border border-gray-100">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-2">Degree</label>
+                  <input
+                    {...register(`education.${index}.degree`)}
+                    placeholder="Bachelor of Science in Computer Science"
+                    className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-2">School</label>
+                  <input
+                    {...register(`education.${index}.school`)}
+                    placeholder="University Name"
+                    className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-medium text-gray-500 mb-2">Graduation Date</label>
+                  <input
+                    {...register(`education.${index}.graduationDate`)}
+                    type="date"
+                    className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+                  />
+                </div>
+              </div>
+              {education.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeEducation(index)}
+                  className="mt-3 text-sm text-red-600 hover:text-red-700 font-medium"
+                >
+                  Remove Education
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Skills</h2>
+      {/* Skills Section */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-2">Skills</h2>
+        <p className="text-xs text-gray-500 mb-5">Add your technical and soft skills</p>
         
         {/* Technical Skills */}
-        <div className="mb-4">
-          <h3 className="text-base font-medium mb-2">Technical Skills</h3>
-          <div className="mb-2">
-            <select
-              onChange={(e) => {
-                if (e.target.value) {
-                  addSkill(e.target.value);
-                  e.target.value = '';
-                }
-              }}
-              className="w-full p-2 border rounded text-sm"
-              defaultValue=""
-            >
-              <option value="">Quick add: Programming Languages & Tools</option>
-              <optgroup label="Languages">
-                <option value="JavaScript">JavaScript</option>
-                <option value="TypeScript">TypeScript</option>
-                <option value="Python">Python</option>
-                <option value="Java">Java</option>
-                <option value="C#">C#</option>
-                <option value="C++">C++</option>
-                <option value="PHP">PHP</option>
-                <option value="Ruby">Ruby</option>
-                <option value="Go">Go</option>
-                <option value="Rust">Rust</option>
-                <option value="Swift">Swift</option>
-                <option value="Kotlin">Kotlin</option>
-                <option value="SQL">SQL</option>
-              </optgroup>
-              <optgroup label="Frameworks & Libraries">
-                <option value="React">React</option>
-                <option value="Next.js">Next.js</option>
-                <option value="Vue.js">Vue.js</option>
-                <option value="Angular">Angular</option>
-                <option value="Node.js">Node.js</option>
-                <option value="Express">Express</option>
-                <option value="Django">Django</option>
-                <option value="Flask">Flask</option>
-                <option value="Spring Boot">Spring Boot</option>
-              </optgroup>
-              <optgroup label="Tools & Technologies">
-                <option value="Git">Git</option>
-                <option value="Docker">Docker</option>
-                <option value="AWS">AWS</option>
-                <option value="Azure">Azure</option>
-                <option value="GraphQL">GraphQL</option>
-                <option value="REST API">REST API</option>
-                <option value="PostgreSQL">PostgreSQL</option>
-                <option value="MongoDB">MongoDB</option>
-              </optgroup>
-            </select>
-          </div>
+        <div className="mb-5">
+          <label className="block text-xs font-medium text-gray-700 mb-2">Quick Add: Technical Skills</label>
+          <select
+            onChange={(e) => {
+              if (e.target.value) {
+                addSkill(e.target.value);
+                e.target.value = '';
+              }
+            }}
+            className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-sm"
+            defaultValue=""
+          >
+            <option value="">Select a technical skill...</option>
+            <optgroup label="Languages">
+              <option value="JavaScript">JavaScript</option>
+              <option value="TypeScript">TypeScript</option>
+              <option value="Python">Python</option>
+              <option value="Java">Java</option>
+              <option value="C#">C#</option>
+              <option value="C++">C++</option>
+              <option value="PHP">PHP</option>
+              <option value="Ruby">Ruby</option>
+              <option value="Go">Go</option>
+              <option value="Rust">Rust</option>
+              <option value="Swift">Swift</option>
+              <option value="Kotlin">Kotlin</option>
+              <option value="SQL">SQL</option>
+            </optgroup>
+            <optgroup label="Frameworks & Libraries">
+              <option value="React">React</option>
+              <option value="Next.js">Next.js</option>
+              <option value="Vue.js">Vue.js</option>
+              <option value="Angular">Angular</option>
+              <option value="Node.js">Node.js</option>
+              <option value="Express">Express</option>
+              <option value="Django">Django</option>
+              <option value="Flask">Flask</option>
+              <option value="Spring Boot">Spring Boot</option>
+            </optgroup>
+            <optgroup label="Tools & Technologies">
+              <option value="Git">Git</option>
+              <option value="Docker">Docker</option>
+              <option value="AWS">AWS</option>
+              <option value="Azure">Azure</option>
+              <option value="GraphQL">GraphQL</option>
+              <option value="REST API">REST API</option>
+              <option value="PostgreSQL">PostgreSQL</option>
+              <option value="MongoDB">MongoDB</option>
+            </optgroup>
+          </select>
         </div>
 
         {/* Soft Skills */}
-        <div className="mb-4">
-          <h3 className="text-base font-medium mb-2">Soft Skills</h3>
-          <div className="mb-2">
-            <select
-              onChange={(e) => {
-                if (e.target.value) {
-                  addSkill(e.target.value);
-                  e.target.value = '';
-                }
-              }}
-              className="w-full p-2 border rounded text-sm"
-              defaultValue=""
-            >
-              <option value="">Quick add: Soft Skills</option>
-              <option value="Leadership">Leadership</option>
-              <option value="Communication">Communication</option>
-              <option value="Problem Solving">Problem Solving</option>
-              <option value="Team Collaboration">Team Collaboration</option>
-              <option value="Time Management">Time Management</option>
-              <option value="Critical Thinking">Critical Thinking</option>
-              <option value="Adaptability">Adaptability</option>
-              <option value="Project Management">Project Management</option>
-            </select>
-          </div>
+        <div className="mb-5">
+          <label className="block text-xs font-medium text-gray-700 mb-2">Quick Add: Soft Skills</label>
+          <select
+            onChange={(e) => {
+              if (e.target.value) {
+                addSkill(e.target.value);
+                e.target.value = '';
+              }
+            }}
+            className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-sm"
+            defaultValue=""
+          >
+            <option value="">Select a soft skill...</option>
+            <option value="Leadership">Leadership</option>
+            <option value="Communication">Communication</option>
+            <option value="Problem Solving">Problem Solving</option>
+            <option value="Team Collaboration">Team Collaboration</option>
+            <option value="Time Management">Time Management</option>
+            <option value="Critical Thinking">Critical Thinking</option>
+            <option value="Adaptability">Adaptability</option>
+            <option value="Project Management">Project Management</option>
+          </select>
         </div>
 
         {/* All Skills Display */}
-        <div className="flex flex-wrap gap-2 mb-3 p-3 bg-gray-50 rounded border">
+        <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-100 min-h-[80px]">
           {skills.length === 0 ? (
-            <p className="text-sm text-gray-500">No skills added yet</p>
+            <p className="text-sm text-gray-400 text-center py-4">No skills added yet</p>
           ) : (
-            skills.map((skill, index) => (
-              <span
-                key={index}
-                className="bg-blue-100 px-3 py-1 rounded-full flex items-center text-sm"
-              >
-                {skill}
-                <button
-                  type="button"
-                  onClick={() => removeSkill(index)}
-                  className="ml-2 text-red-500 hover:text-red-700 font-bold"
+            <div className="flex flex-wrap gap-2">
+              {skills.map((skill, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors"
                 >
-                  ×
-                </button>
-              </span>
-            ))
+                  {skill}
+                  <button
+                    type="button"
+                    onClick={() => removeSkill(index)}
+                    className="text-blue-600 hover:text-blue-800 font-bold text-base leading-none"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
           )}
         </div>
 
@@ -409,7 +457,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
           <input
             type="text"
             id="skillInput"
-            placeholder="Add any skill (technical, soft skill, or tool)"
+            placeholder="Add custom skill..."
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault();
@@ -417,7 +465,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
                 (e.target as HTMLInputElement).value = '';
               }
             }}
-            className="flex-1 p-2 border rounded text-sm"
+            className="flex-1 px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-sm"
           />
           <button
             type="button"
@@ -428,19 +476,22 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
               addSkill(input.value);
               input.value = '';
             }}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm"
+            className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
           >
             Add
           </button>
         </div>
       </div>
 
-      <button
-        type="submit"
-        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded"
-      >
-        Save Resume
-      </button>
+      {/* Save Button */}
+      <div className="flex justify-end pt-2">
+        <button
+          type="submit"
+          className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm hover:shadow-md transition-all"
+        >
+          Save Resume
+        </button>
+      </div>
     </form>
   );
 };

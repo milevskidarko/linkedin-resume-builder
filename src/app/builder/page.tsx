@@ -160,46 +160,56 @@ export default function BuilderPage() {
             <ResumeForm key={resumeId || 'new'} initialData={resumeData} onChange={setResumeData} />
             
             {resumeId && (
-              <div className="mt-6 p-4 border rounded-lg bg-gray-50">
-                <h3 className="font-semibold mb-3">Sharing Settings</h3>
-                <div className="space-y-3">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={metadata.isPublic}
-                      onChange={(e) => {
-                        const newIsPublic = e.target.checked;
-                        setMetadata(prev => ({ ...prev, isPublic: newIsPublic }));
-                        void saveDraft(resumeData, { isPublic: newIsPublic, username: usernameInput });
-                      }}
-                      className="w-4 h-4"
-                    />
-                    <span className="text-sm">Make resume public</span>
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-6 mt-5">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Sharing Settings</h3>
+                <p className="text-xs text-gray-500 mb-5">Control who can view your resume</p>
+                
+                <div className="space-y-4">
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        checked={metadata.isPublic}
+                        onChange={(e) => {
+                          const newIsPublic = e.target.checked;
+                          setMetadata(prev => ({ ...prev, isPublic: newIsPublic }));
+                          void saveDraft(resumeData, { isPublic: newIsPublic, username: usernameInput });
+                        }}
+                        className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                      />
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-700">Make resume public</span>
+                      <p className="text-xs text-gray-500">Anyone with the link can view your resume</p>
+                    </div>
                   </label>
                   
                   {metadata.isPublic && (
-                    <div>
-                      <label className="text-sm block font-medium mb-1">Username for public link</label>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={usernameInput}
-                          onChange={(e) => setUsernameInput(e.target.value)}
-                          placeholder="your-username"
-                          className="flex-1 px-3 py-2 border rounded text-sm"
-                        />
-                        <button
-                          onClick={() => void saveDraft(resumeData, { isPublic: true, username: usernameInput })}
-                          disabled={status === "saving"}
-                          className="px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:bg-gray-400"
-                        >
-                          {status === "saving" ? "Saving..." : "Save Username"}
-                        </button>
+                    <div className="pl-8 pt-2 space-y-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-2">Username for public link</label>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={usernameInput}
+                            onChange={(e) => setUsernameInput(e.target.value)}
+                            placeholder="your-username"
+                            className="flex-1 px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-sm"
+                          />
+                          <button
+                            onClick={() => void saveDraft(resumeData, { isPublic: true, username: usernameInput })}
+                            disabled={status === "saving"}
+                            className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white text-sm font-medium rounded-lg transition-colors"
+                          >
+                            {status === "saving" ? "Saving..." : "Save"}
+                          </button>
+                        </div>
                       </div>
                       {metadata.username && (
-                        <p className="text-xs text-gray-600 mt-2">
-                          Share link: <code className="bg-gray-100 px-1 rounded">/r/{metadata.username}</code>
-                        </p>
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                          <p className="text-xs font-medium text-blue-900 mb-1">Public Link</p>
+                          <code className="text-sm text-blue-700 font-mono">/r/{metadata.username}</code>
+                        </div>
                       )}
                     </div>
                   )}

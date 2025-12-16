@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@auth0/nextjs-auth0";
+import { requireAuth } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -29,14 +29,6 @@ type ResumePayload = {
   isPublic?: boolean;
   username?: string;
 };
-
-async function requireSession(req: NextRequest) {
-  const session = await getSession();
-  if (!session?.user) {
-    throw new Error("Unauthorized");
-  }
-  return { session };
-}
 
 async function getOrCreateUser(auth0Sub: string, email?: string | null) {
   try {
@@ -70,14 +62,11 @@ function isValidPayload(body: unknown): body is ResumePayload {
   return true;
 }
 
-export async function GET(req: NextRequest) {
-  const sessionCheck = await requireSession(req);
-  const { session } = sessionCheck;
-
-  const user = await getOrCreateUser(session.user.sub as string, session.user.email);
+export const GET = requireAuth(async (req: NextRequest, user: any) => {
+  const dbUser = await getOrCreateUser(user.sub as string, user.email);
 
   const resumes = await prisma.resume.findMany({
-    where: { userId: user.id },
+    where: { userId: dbUser.id },
     orderBy: { updatedAt: "desc" },
     select: {
       id: true,
@@ -89,12 +78,9 @@ export async function GET(req: NextRequest) {
   });
 
   return NextResponse.json({ resumes });
-}
+});
 
-export async function POST(req: NextRequest) {
-  const sessionCheck = await requireSession(req);
-  const { session } = sessionCheck;
-
+export const POST = requireAuth(async (req: NextRequest, user: any) => {
   const body = await req.json().catch(() => null);
   if (!isValidPayload(body)) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
@@ -102,12 +88,12 @@ export async function POST(req: NextRequest) {
 
   const { personal, summary, experience, education, skills, isPublic, username } = body;
 
-  const user = await getOrCreateUser(session.user.sub as string, session.user.email);
+  const dbUser = await getOrCreateUser(user.sub as string, user.email);
 
-  if (username && user.id !== "mock-user-id") {
+  if (username && dbUser.id !== "mock-user-id") {
     try {
       await prisma.user.update({
-        where: { id: user.id },
+        where: { id: dbUser.id },
         data: { username: username || null },
       });
     } catch (e) {
@@ -118,7 +104,7 @@ export async function POST(req: NextRequest) {
   try {
     const resume = await prisma.resume.create({
       data: {
-        userId: user.id,
+        userId: dbUser.id,
         name: personal.name,
         email: personal.email,
         phone: personal.phone,
@@ -156,4 +142,4 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     );
   }
-}
+});

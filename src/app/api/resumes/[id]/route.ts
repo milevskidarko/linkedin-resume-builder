@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@auth0/nextjs-auth0";
+import { requireAuth } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -30,14 +30,6 @@ type ResumePayload = {
   username?: string;
 };
 
-async function requireSession(req: NextRequest) {
-  const session = await getSession();
-  if (!session?.user) {
-    throw new Error("Unauthorized");
-  }
-  return { session };
-}
-
 function isValidPayload(body: unknown): body is ResumePayload {
   if (!body || typeof body !== "object") return false;
   const obj = body as Record<string, unknown>;
@@ -52,13 +44,11 @@ function isValidPayload(body: unknown): body is ResumePayload {
   return true;
 }
 
-export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+export const GET = requireAuth(async (req: NextRequest, user: any, context: { params: Promise<{ id: string }> }) => {
   const params = await context.params;
-  const sessionCheck = await requireSession(req);
-  const { session } = sessionCheck;
 
   const resume = await prisma.resume.findFirst({
-    where: { id: params.id, user: { auth0Sub: session.user.sub as string } },
+    where: { id: params.id, user: { auth0Sub: user.sub as string } },
     include: {
       user: { select: { username: true } },
       experiences: { orderBy: { sort: "asc" } },
@@ -99,12 +89,10 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
       updatedAt: resume.updatedAt,
     }
   );
-}
+});
 
-export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+export const PUT = requireAuth(async (req: NextRequest, user: any, context: { params: Promise<{ id: string }> }) => {
   const params = await context.params;
-  const sessionCheck = await requireSession(req);
-  const { session } = sessionCheck;
 
   const body = await req.json().catch(() => null);
   if (!isValidPayload(body)) {
@@ -114,7 +102,7 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
   const { personal, summary, experience, education, skills, isPublic, username } = body;
 
   const existing = await prisma.resume.findFirst({
-    where: { id: params.id, user: { auth0Sub: session.user.sub as string } },
+    where: { id: params.id, user: { auth0Sub: user.sub as string } },
   });
 
   if (!existing) {
@@ -123,7 +111,7 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
 
   if (username !== undefined) {
     await prisma.user.update({
-      where: { auth0Sub: session.user.sub as string },
+      where: { auth0Sub: user.sub as string },
       data: { username: username || null },
     });
   }
@@ -169,4 +157,4 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
   });
 
   return NextResponse.json({ ok: true });
-}
+});
