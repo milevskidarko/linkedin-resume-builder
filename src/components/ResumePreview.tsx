@@ -27,7 +27,7 @@ type ResumeData = {
   skills: string[];
 };
 
-export default function ResumePreview({ data }: { data: ResumeData }) {
+export default function ResumePreview({ formData, showPrintButton }: { formData: ResumeData; showPrintButton?: boolean }) {
   const previewRef = useRef<HTMLDivElement>(null);
 
   const downloadPDF = async () => {
@@ -49,11 +49,10 @@ export default function ResumePreview({ data }: { data: ResumeData }) {
       console.log("Canvas created", canvas);
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF();
-      const imgWidth = 210; // A4 width in mm
+      const imgWidth = 210;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
       if (imgHeight > 295) {
-        // Scale down to fit on one page
         const scale = 295 / imgHeight;
         pdf.addImage(imgData, "PNG", 0, 0, imgWidth * scale, 295);
       } else {
@@ -69,12 +68,14 @@ export default function ResumePreview({ data }: { data: ResumeData }) {
 
   return (
     <div>
-      <button
-        onClick={downloadPDF}
-        className="mb-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-      >
-        Download PDF
-      </button>
+      {showPrintButton && (
+        <button
+          onClick={downloadPDF}
+          className="mb-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+        >
+          Download PDF
+        </button>
+      )}
       <div
         ref={previewRef}
         style={{
@@ -85,20 +86,20 @@ export default function ResumePreview({ data }: { data: ResumeData }) {
           boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
         }}
       >
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>{data.personal.name}</h1>
-        <p style={{ marginBottom: '0.5rem' }}>{data.personal.email} | {data.personal.phone}</p>
-        {data.personal.address && <p style={{ marginBottom: '1rem' }}>{data.personal.address}</p>}
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>{formData.personal.name}</h1>
+        <p style={{ marginBottom: '0.5rem' }}>{formData.personal.email} | {formData.personal.phone}</p>
+        {formData.personal.address && <p style={{ marginBottom: '1rem' }}>{formData.personal.address}</p>}
 
-        {data.summary && (
+        {formData.summary && (
           <div style={{ marginBottom: '1rem' }}>
             <h2 style={{ fontSize: '1.125rem', fontWeight: '600' }}>Summary</h2>
-            <p>{data.summary}</p>
+            <p>{formData.summary}</p>
           </div>
         )}
 
         <div style={{ marginBottom: '1rem' }}>
           <h2 style={{ fontSize: '1.125rem', fontWeight: '600' }}>Experience</h2>
-          {data.experience.map((exp, index) => (
+          {formData.experience.map((exp, index) => (
             <div key={index} style={{ marginBottom: '0.5rem' }}>
               <h3 style={{ fontWeight: '500' }}>{exp.title} at {exp.company}</h3>
               <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>{exp.startDate} - {exp.endDate || "Present"}</p>
@@ -109,7 +110,7 @@ export default function ResumePreview({ data }: { data: ResumeData }) {
 
         <div style={{ marginBottom: '1rem' }}>
           <h2 style={{ fontSize: '1.125rem', fontWeight: '600' }}>Education</h2>
-          {data.education.map((edu, index) => (
+          {formData.education.map((edu, index) => (
             <div key={index} style={{ marginBottom: '0.5rem' }}>
               <h3 style={{ fontWeight: '500' }}>{edu.degree}</h3>
               <p>{edu.school} - {edu.graduationDate}</p>
@@ -119,7 +120,7 @@ export default function ResumePreview({ data }: { data: ResumeData }) {
 
         <div>
           <h2 style={{ fontSize: '1.125rem', fontWeight: '600' }}>Skills</h2>
-          <p>{data.skills.join(", ")}</p>
+          <p>{formData.skills.join(", ")}</p>
         </div>
       </div>
     </div>

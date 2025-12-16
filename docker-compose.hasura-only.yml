@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  hasura:
+    image: hasura/graphql-engine:latest
+    ports:
+      - "8080:8080"
+    environment:
+      # If using Supabase, get this from Project Settings > Database > Connection String
+      # If using Neon, get from your Neon dashboard
+      HASURA_GRAPHQL_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/resume_db
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_DEV_MODE: "true"
+      HASURA_GRAPHQL_ADMIN_SECRET: hasura-admin-secret-change-me
+      HASURA_GRAPHQL_LOG_LEVEL: debug

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect,  useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -36,10 +36,12 @@ export type ResumeFormData = z.infer<typeof resumeSchema>;
 
 type ResumeFormProps = {
   onChange: (data: ResumeFormData) => void;
+  initialData?: ResumeFormData | null;
 };
 
 const ResumeForm: React.FC<ResumeFormProps> = ({
   onChange,
+  initialData,
 }: ResumeFormProps) => {
   const {
     register,
@@ -47,9 +49,10 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
     formState: { errors },
     setValue,
     watch,
+    reset,
   } = useForm<ResumeFormData>({
     resolver: zodResolver(resumeSchema),
-    defaultValues: {
+    defaultValues: initialData ?? {
       personal: { name: '', email: '', phone: '', address: '' },
       summary: '',
       experience: [
@@ -60,14 +63,34 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
     },
   });
 
-  const formValues = watch();
+  useEffect(() => {
+    if (initialData) {
+      reset(initialData);
+    }
+  }, [initialData, reset]);
+
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   useEffect(() => {
-    const subscription = watch((value) => {
-      onChange(value as ResumeFormData);
+    let debounceTimer: NodeJS.Timeout;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const subscription = watch((value: any) => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      
+      debounceTimer = setTimeout(() => {
+        onChangeRef.current(value as ResumeFormData);
+      }, 500);
     });
-    return () => subscription.unsubscribe();
-  }, [watch, onChange]);
+
+    return () => {
+      subscription.unsubscribe();
+      if (debounceTimer) clearTimeout(debounceTimer);
+    };
+  }, [watch]);
 
   const experience = watch('experience');
   const education = watch('education');
@@ -75,7 +98,6 @@ const ResumeForm: React.FC<ResumeFormProps> = ({
 
   const onSubmit = (data: ResumeFormData) => {
     console.log(data);
-    // Later, save or preview
   };
 
   const addExperience = () => {
