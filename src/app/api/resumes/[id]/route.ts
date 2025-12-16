@@ -1,10 +1,8 @@
 import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@auth0/nextjs-auth0";
-import { cookies } from "next/headers";
+import { getSession, withApiAuthRequired } from "@auth0/nextjs-auth0/edge";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 type ResumePayload = {
   personal: {
@@ -45,13 +43,13 @@ function isValidPayload(body: unknown): body is ResumePayload {
   return true;
 }
 
-export async function GET(
+export const GET = withApiAuthRequired(async (
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-) {
+) => {
   const { id } = await params;
-  await cookies(); // Ensure cookies are accessed
-  const session = await getSession();
+  const res = new NextResponse();
+  const session = await getSession(req, res);
   
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -99,15 +97,15 @@ export async function GET(
       updatedAt: resume.updatedAt,
     }
   );
-}
+});
 
-export async function PUT(
+export const PUT = withApiAuthRequired(async (
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-) {
+) => {
   const { id } = await params;
-  await cookies(); // Ensure cookies are accessed
-  const session = await getSession();
+  const res = new NextResponse();
+  const session = await getSession(req, res);
   
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -176,4 +174,4 @@ export async function PUT(
   });
 
   return NextResponse.json({ ok: true });
-}
+});
