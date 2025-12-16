@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@auth0/nextjs-auth0";
+import { auth } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -50,16 +50,17 @@ export async function GET(
 ) {
   const { id } = await params;
   console.log('[API /resumes/[id] GET] Starting request for id:', id);
-  const session = await getSession();
-  console.log('[API /resumes/[id] GET] Session:', session ? 'exists' : 'null', session?.user?.sub);
+  const session = await auth();
+  const userId = session?.user?.providerAccountId;
+  console.log('[API /resumes/[id] GET] NextAuth userId:', userId);
   
-  if (!session?.user) {
-    console.log('[API /resumes/[id] GET] No session found, returning 401');
+  if (!userId) {
+    console.log('[API /resumes/[id] GET] No user authenticated, returning 401');
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   
   const resume = await prisma.resume.findFirst({
-    where: { id, user: { auth0Sub: session.user.sub } },
+    where: { id, user: { auth0Sub: userId } },
     include: {
       user: { select: { username: true } },
       experiences: { orderBy: { sort: "asc" } },
@@ -108,11 +109,12 @@ export async function PUT(
 ) {
   const { id } = await params;
   console.log('[API /resumes/[id] PUT] Starting request for id:', id);
-  const session = await getSession();
-  console.log('[API /resumes/[id] PUT] Session:', session ? 'exists' : 'null', session?.user?.sub);
+  const session = await auth();
+  const userId = session?.user?.providerAccountId;
+  console.log('[API /resumes/[id] PUT] NextAuth userId:', userId);
   
-  if (!session?.user) {
-    console.log('[API /resumes/[id] PUT] No session found, returning 401');
+  if (!userId) {
+    console.log('[API /resumes/[id] PUT] No user authenticated, returning 401');
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -124,7 +126,7 @@ export async function PUT(
   const { personal, summary, experience, education, skills, isPublic, username } = body;
 
   const existing = await prisma.resume.findFirst({
-    where: { id, user: { auth0Sub: session.user.sub } },
+    where: { id, user: { auth0Sub: userId } },
   });
 
   if (!existing) {
@@ -133,7 +135,7 @@ export async function PUT(
 
   if (username !== undefined) {
     await prisma.user.update({
-      where: { auth0Sub: session.user.sub },
+      where: { auth0Sub: userId },
       data: { username: username || null },
     });
   }

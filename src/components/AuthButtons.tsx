@@ -1,35 +1,34 @@
 "use client";
 
-import Link from "next/link";
-import { useUser } from "@auth0/nextjs-auth0/client";
+import { useSession, signIn, signOut } from "next-auth/react";
 
 export default function AuthButtons() {
-  const { user, isLoading } = useUser();
+  const { data: session, status } = useSession();
 
-  if (isLoading) {
+  if (status === "loading") {
     return <span className="text-sm">Loading...</span>;
   }
 
-  if (!user) {
+  if (!session) {
     return (
-      <Link
-        href="/api/auth/login"
+      <button
+        onClick={() => signIn("google")}
         className="bg-white text-blue-600 px-3 py-1 rounded-md text-sm font-semibold hover:bg-blue-50 transition"
       >
         Sign in
-      </Link>
+      </button>
     );
   }
 
   return (
     <div className="flex items-center gap-3 text-sm">
-      <span className="hidden sm:inline">Hi, {user.name || user.email}</span>
-      <Link
-        href="/api/auth/logout"
+      <span className="hidden sm:inline">Hi, {session.user?.name || session.user?.email}</span>
+      <button
+        onClick={() => signOut()}
         className="bg-white/10 text-white px-3 py-1 rounded-md font-semibold hover:bg-white/20 transition"
       >
         Log out
-      </Link>
+      </button>
     </div>
   );
 }

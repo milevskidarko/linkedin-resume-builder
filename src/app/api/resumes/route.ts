@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@auth0/nextjs-auth0";
+import { auth } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -30,17 +30,17 @@ type ResumePayload = {
   username?: string;
 };
 
-async function getOrCreateUser(auth0Sub: string, email?: string | null) {
+async function getOrCreateUser(clerkUserId: string, email?: string | null) {
   try {
     return await prisma.user.upsert({
-      where: { auth0Sub },
+      where: { auth0Sub: clerkUserId },
       update: { email: email ?? undefined },
-      create: { auth0Sub, email: email ?? undefined },
+      create: { auth0Sub: clerkUserId, email: email ?? undefined },
     });
   } catch (e) {
     return {
       id: "mock-user-id",
-      auth0Sub,
+      auth0Sub: clerkUserId,
       email: email ?? undefined,
       username: null,
     };
@@ -64,16 +64,17 @@ function isValidPayload(body: unknown): body is ResumePayload {
 export async function GET(req: NextRequest) {
   try {
     console.log('[API /resumes GET] Starting request');
-    const session = await getSession();
-    console.log('[API /resumes GET] Session:', session ? 'exists' : 'null', session?.user?.sub);
+    const session = await auth();
+    const userId = session?.user?.providerAccountId;
+    console.log('[API /resumes GET] NextAuth userId:', userId);
     
-    if (!session?.user) {
-      console.log('[API /resumes GET] No session found, returning 401');
+    if (!userId) {
+      console.log('[API /resumes GET] No user authenticated, returning 401');
       return NextResponse.json({ error: "Unauthorized", details: "No session found" }, { status: 401 });
     }
     
-    console.log('[API /resumes GET] Getting user:', session.user.sub, session.user.email);
-    const dbUser = await getOrCreateUser(session.user.sub, session.user.email);
+    console.log('[API /resumes GET] Getting user from DB:', userId);
+    const dbUser = await getOrCreateUser(userId);
     console.log('[API /resumes GET] DB User:', dbUser.id);
 
     const resumes = await prisma.resume.findMany({
@@ -89,8 +90,8 @@ export async function GET(req: NextRequest) {
     });
 
     const response = NextResponse.json({ resumes });
-    response.headers.set('X-Auth-Mode', 'dynamic-auth0');
-    response.headers.set('X-Deploy-Version', 'v3-dynamic');
+    response.headers.set('X-Auth-Mode', 'nextauth');
+    response.headers.set('X-Deploy-Version', 'v5-nextauth');
     return response;
   } catch (error) {
     return NextResponse.json({ 
@@ -103,11 +104,12 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   console.log('[API /resumes POST] Starting request');
-  const session = await getSession();
-  console.log('[API /resumes POST] Session:', session ? 'exists' : 'null', session?.user?.sub);
+  const session = await auth();
+  const userId = session?.user?.providerAccountId;
+  console.log('[API /resumes POST] NextAuth userId:', userId);
   
-  if (!session?.user) {
-    console.log('[API /resumes POST] No session found, returning 401');
+  if (!userId) {
+    console.log('[API /resumes POST] No user authenticated, returning 401');
     return NextResponse.json({ error: "Unauthorized", details: "No session found" }, { status: 401 });
   }
 
@@ -118,7 +120,7 @@ export async function POST(req: NextRequest) {
 
   const { personal, summary, experience, education, skills, isPublic, username } = body;
   
-  const dbUser = await getOrCreateUser(session.user.sub, session.user.email);
+  const dbUser = await getOrCreateUser(userId);
 
   if (username && dbUser.id !== "mock-user-id") {
     try {

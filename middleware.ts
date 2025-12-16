@@ -1,10 +1,17 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { withMiddlewareAuthRequired } from "@auth0/nextjs-auth0/edge";
+import { auth } from "@/lib/auth";
 
-// Middleware to handle authentication - redirects to login if not authenticated
-export default withMiddlewareAuthRequired();
+export default auth((req) => {
+  const isLoggedIn = !!req.auth;
+  const isOnProtected = req.nextUrl.pathname.startsWith("/builder") || req.nextUrl.pathname.startsWith("/preview");
+
+  if (isOnProtected && !isLoggedIn) {
+    return Response.redirect(new URL("/", req.url));
+  }
+});
 
 export const config = {
-  matcher: ["/builder/:path*", "/preview/:path*"],
+  matcher: [
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    '/(api|trpc)(.*)',
+  ],
 };

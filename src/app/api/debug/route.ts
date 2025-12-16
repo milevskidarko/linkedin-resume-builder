@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@auth0/nextjs-auth0";
+import { getSession } from "@auth0/nextjs-auth0";
 
 export const dynamic = "force-dynamic";
 
