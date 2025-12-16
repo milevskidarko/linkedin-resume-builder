@@ -6,8 +6,19 @@ export const authConfig = {
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+        },
+      },
     }),
   ],
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
   callbacks: {
     async jwt({ token, account, profile }) {
       if (account && profile) {
@@ -29,4 +40,8 @@ export const authConfig = {
   pages: {
     signIn: "/",
   },
+  basePath: "/api/auth",
+  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
+  trustHost: true,
+  debug: process.env.NODE_ENV === "development",
 } satisfies NextAuthConfig;
