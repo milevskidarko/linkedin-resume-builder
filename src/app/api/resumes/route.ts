@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@auth0/nextjs-auth0";
 
@@ -60,8 +60,9 @@ function isValidPayload(body: unknown): body is ResumePayload {
   return true;
 }
 
-export async function GET() {
-  const session = await getSession();
+export async function GET(req: NextRequest) {
+  const res = new NextResponse();
+  const session = await getSession(req, res);
   
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -84,8 +85,9 @@ export async function GET() {
   return NextResponse.json({ resumes });
 }
 
-export async function POST(req: Request) {
-  const session = await getSession();
+export async function POST(req: NextRequest) {
+  const res = new NextResponse();
+  const session = await getSession(req, res);
   
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
